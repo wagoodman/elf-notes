@@ -1,0 +1,11 @@
+.venv
+*.png
+*.svg
+*.pdf
+*.json
+*.txt
+!requirements.txt
+.ropeproject
+.idea
+.vscode
+.DS_Store
