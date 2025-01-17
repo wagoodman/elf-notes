@@ -1,4 +1,4 @@
-.PHONY: separate combined
+.PHONY: separate combined original
 
 .venv:
 	python3 -m venv .venv
@@ -9,3 +9,6 @@ separate: .venv
 
 combined:  .venv
 	cd combined && make
+
+original:  .venv
+	cd original && make
