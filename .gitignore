@@ -4,8 +4,10 @@
 *.pdf
 *.json
 *.txt
+*.gz
 !requirements.txt
 .ropeproject
 .idea
 .vscode
 .DS_Store
+/NOTES.md

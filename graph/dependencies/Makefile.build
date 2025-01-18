@@ -1,0 +1,41 @@
+CC=gcc
+CFLAGS=-Wall -Wextra
+LDFLAGS=-lgd -lz -lpng -lm
+STATIC_LDFLAGS=-static -lgd -lpng -lz -lm -lfontconfig -lfreetype -lexpat -luuid -lbz2 -lpthread
+
+TARGET=image-creator
+VERSION=1.0.0
+
+.PHONY: all clean static show find-libs
+
+all: $(TARGET) show
+
+$(TARGET): src/main.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+static: src/main.c
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(STATIC_LDFLAGS)
+
+show:
+	@# should show "not a dynamic executable"
+	ldd $(TARGET) || true
+
+	@# should show "statically linked"
+	file $(TARGET) || true
+
+	@# will show library symbols that were linked in
+	readelf -a ./image-creator | grep -i "lib" > symbols.txt
+
+	find /usr/lib -name "*.a" | grep -E 'libgd|libz|libpng|fontconfig|freetype|expat|uuid|bz2' > evidence.txt
+	dpkg -l | grep -E 'libgd|zlib|libpng|fontconfig|freetype|expat|uuid|bzip2' > pkg.txt
+
+find-libs:
+	python3 find_libs.py "$(STATIC_LDFLAGS)"
+
+write-notes:
+	python3 make_notes.py libs.json --name $(TARGET) --version $(VERSION) --type "deb"
+	objcopy --add-section .note.package=notes.json --set-section-flags .note.package=noload,readonly $(TARGET) /tmp/$(TARGET)
+	mv /tmp/$(TARGET) $(TARGET)
+
+clean:
+	rm -f $(TARGET)
